@@ -3,6 +3,7 @@ package main
 import (
 	"chat-system/api"
 	"chat-system/database"
+	"chat-system/service"
 	"github.com/labstack/echo/v4"
 )
 
@@ -14,7 +15,8 @@ func main() {
 		panic(err)
 	}
 
-	api.RegisterAPIHandler(db, e)
+	info := service.NewInfoService(db)
+	api.RegisterAPIHandler(info, e)
 
 	e.Logger.Fatal(e.Start(":3000"))
 }

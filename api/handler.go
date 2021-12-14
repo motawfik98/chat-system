@@ -1,18 +1,18 @@
 package api
 
 import (
+	"chat-system/service"
 	"github.com/labstack/echo/v4"
-	"gorm.io/gorm"
 )
 
 type Handler struct {
-	dnConn *gorm.DB
+	dnConn *service.Info
 	router *echo.Echo
 }
 
-func RegisterAPIHandler(dbConn *gorm.DB, router *echo.Echo) {
+func RegisterAPIHandler(info *service.Info, router *echo.Echo) {
 	handler := &Handler{
-		dnConn: dbConn,
+		dnConn: info,
 		router: router,
 	}
 	handler.Routes()
