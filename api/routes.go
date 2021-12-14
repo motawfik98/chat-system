@@ -11,4 +11,5 @@ func (h *Handler) Routes() {
 	})
 
 	h.router.POST("/application", h.HandleCreateApplication)
+	h.router.POST("/chat", h.HandleCreateChat)
 }

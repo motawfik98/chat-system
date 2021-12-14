@@ -13,7 +13,7 @@ func InitDB() (*gorm.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = conn.AutoMigrate(&domain.Application{})
+	err = conn.AutoMigrate(&domain.Application{}, &domain.Chat{})
 	if err != nil {
 		return nil, err
 	}
