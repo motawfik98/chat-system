@@ -8,11 +8,12 @@ import (
 
 type Message struct {
 	ID          string      `json:"-" gorm:"primaryKey;autoIncrement:false"`
-	Number      uint        `json:"number" gorm:"uniqueIndex:application_number_chat;default:1"`
 	AppToken    string      `json:"appToken" gorm:"uniqueIndex:application_number_chat"`
 	ChatNumber  string      `json:"chatNumber" gorm:"uniqueIndex:application_number_chat"`
+	Number      uint        `json:"number" gorm:"uniqueIndex:application_number_chat;default:1"`
 	Application Application `json:"-" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:AppToken;references:Token" validate:"required,nostructlevel"`
 	Chat        Chat        `json:"-" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:ChatNumber;references:Number" validate:"required,nostructlevel"`
+	Message     string      `json:"message" validate:"required"`
 	CreatedAt   time.Time
 }
 
