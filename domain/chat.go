@@ -11,6 +11,7 @@ type Chat struct {
 	Number    uint        `json:"number" gorm:"uniqueIndex:number_token;default:1"`
 	AppToken  string      `json:"appToken" gorm:"uniqueIndex:number_token;size:36"`
 	App       Application `json:"-" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:AppToken;references:Token" validate:"required,nostructlevel"`
+	Title     string      `json:"title" validate:"required"`
 	CreatedAt time.Time
 }
 
