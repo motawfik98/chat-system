@@ -7,14 +7,14 @@ import (
 )
 
 type Message struct {
-	ID          string      `json:"-" gorm:"primaryKey;autoIncrement:false"`
-	AppToken    string      `json:"appToken" gorm:"uniqueIndex:application_number_chat"`
-	ChatNumber  string      `json:"chatNumber" gorm:"uniqueIndex:application_number_chat"`
-	Number      uint        `json:"number" gorm:"uniqueIndex:application_number_chat;default:1"`
-	Application Application `json:"-" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:AppToken;references:Token" validate:"required,nostructlevel"`
-	Chat        Chat        `json:"-" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:ChatNumber;references:Number" validate:"required,nostructlevel"`
-	Message     string      `json:"message" validate:"required"`
-	CreatedAt   time.Time
+	ID         string `json:"-" gorm:"primaryKey;autoIncrement:false"`
+	AppToken   string `json:"appToken" gorm:"uniqueIndex:application_number_chat;size:36"`
+	ChatNumber uint   `json:"chatNumber" gorm:"uniqueIndex:application_number_chat"`
+	Number     uint   `json:"number" gorm:"uniqueIndex:application_number_chat;default:1"`
+	ChatID     string `json:"-" gorm:"size:36"`
+	Chat       Chat   `json:"-" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:ChatID;references:ID" validate:"required,nostructlevel"`
+	Message    string `json:"message" validate:"required"`
+	CreatedAt  time.Time
 }
 
 func (m *Message) BeforeCreate(tx *gorm.DB) (err error) {
@@ -23,8 +23,7 @@ func (m *Message) BeforeCreate(tx *gorm.DB) (err error) {
 		err = e
 	}
 	m.ID = u.String()
-	var max uint
-	tx.Select("MAX(number) + 1").Table("messages").Where("app_token = ? AND chat_number = ?", m.AppToken, m.ChatNumber).Scan(&max)
-	m.Number = max
+	tx.Select("MAX(number) + 1").Table("messages").Where("app_token = ? AND chat_number = ?", m.AppToken, m.ChatNumber).Scan(&m.Number)
+	tx.Select("DISTINCT(ID)").Table("chats").Where("app_token = ? AND number = ?", m.AppToken, m.ChatNumber).Find(&m.ChatID)
 	return
 }

@@ -8,9 +8,10 @@ import (
 
 type Chat struct {
 	ID        string      `json:"-" gorm:"primaryKey;autoIncrement:false"`
-	Number    uint        `json:"number" gorm:"uniqueIndex:number_token;default:1"`
 	AppToken  string      `json:"appToken" gorm:"uniqueIndex:number_token;size:36"`
-	App       Application `json:"-" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:AppToken;references:Token" validate:"required,nostructlevel"`
+	Number    uint        `json:"number" gorm:"uniqueIndex:number_token;default:1"`
+	AppID     string      `json:"-" gorm:"size:36"`
+	App       Application `json:"-" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:AppID;references:ID" validate:"required,nostructlevel"`
 	Title     string      `json:"title" validate:"required"`
 	CreatedAt time.Time
 }
@@ -21,8 +22,7 @@ func (c *Chat) BeforeCreate(tx *gorm.DB) (err error) {
 		err = e
 	}
 	c.ID = u.String()
-	var max uint
-	tx.Select("MAX(number) + 1").Table("chats").Where("app_token = ?", c.AppToken).Scan(&max)
-	c.Number = max
+	tx.Select("MAX(number) + 1").Table("chats").Where("app_token = ?", c.AppToken).Scan(&c.Number)
+	tx.Select("DISTINCT(ID)").Table("applications").Where("token = ?", c.AppToken).Scan(&c.AppID)
 	return
 }
