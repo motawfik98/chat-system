@@ -17,7 +17,7 @@ func (h *Handler) Routes() {
 
 	h.router.GET("/applications/:token/chats", h.HandleGetAllChatsByApplication)
 	h.router.GET("/applications/:token/chats/:number", h.HandleGetChatByAppTokenAndNumber)
-	h.router.POST("/chats", h.HandleCreateChat)
+	h.router.POST("/applications/:token/chats", h.HandleCreateChat)
 
 	h.router.GET("/applications/:token/chats/:number/messages", h.HandleCreateMessage)
 	h.router.GET("/applications/:token/chats/:number/messages/:msg", h.HandleCreateMessage)

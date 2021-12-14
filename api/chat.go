@@ -8,7 +8,8 @@ import (
 )
 
 func (h *Handler) HandleCreateChat(c echo.Context) error {
-	chat := new(domain.Chat)
+	appToken := c.Param("token")
+	chat := &domain.Chat{AppToken: appToken}
 	if err := c.Bind(chat); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}

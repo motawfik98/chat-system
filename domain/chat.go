@@ -9,7 +9,7 @@ import (
 type Chat struct {
 	ID        string      `json:"-" gorm:"primaryKey;autoIncrement:false"`
 	Number    uint        `json:"number" gorm:"uniqueIndex:number_token;default:1"`
-	AppToken  string      `json:"appToken" gorm:"uniqueIndex:number_token;size:36" validate:"required"`
+	AppToken  string      `json:"appToken" gorm:"uniqueIndex:number_token;size:36"`
 	App       Application `json:"-" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:AppToken;references:Token" validate:"required,nostructlevel"`
 	CreatedAt time.Time
 }
