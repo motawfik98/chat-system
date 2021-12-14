@@ -7,11 +7,13 @@ import (
 )
 
 type Message struct {
-	ID         string `json:"-" gorm:"primaryKey;autoIncrement:false"`
-	Number     uint   `json:"number" gorm:"uniqueIndex:number_chat;default:1"`
-	ChatNumber string `json:"chatNumber" gorm:"uniqueIndex:number_chat" validate:"required"`
-	Chat       Chat   `json:"-" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:ChatNumber;references:Number" validate:"required,nostructlevel"`
-	CreatedAt  time.Time
+	ID          string      `json:"-" gorm:"primaryKey;autoIncrement:false"`
+	Number      uint        `json:"number" gorm:"uniqueIndex:application_number_chat;default:1"`
+	AppToken    string      `json:"appToken" gorm:"uniqueIndex:application_number_chat"`
+	ChatNumber  string      `json:"chatNumber" gorm:"uniqueIndex:application_number_chat"`
+	Application Application `json:"-" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:AppToken;references:Token" validate:"required,nostructlevel"`
+	Chat        Chat        `json:"-" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:ChatNumber;references:Number" validate:"required,nostructlevel"`
+	CreatedAt   time.Time
 }
 
 func (m *Message) BeforeCreate(tx *gorm.DB) (err error) {
@@ -21,7 +23,7 @@ func (m *Message) BeforeCreate(tx *gorm.DB) (err error) {
 	}
 	m.ID = u.String()
 	var max uint
-	tx.Select("MAX(number) + 1").Table("messages").Where("chat_number = ?", m.ChatNumber).Scan(&max)
+	tx.Select("MAX(number) + 1").Table("messages").Where("app_token = ? AND chat_number = ?", m.AppToken, m.ChatNumber).Scan(&max)
 	m.Number = max
 	return
 }
