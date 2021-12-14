@@ -7,9 +7,9 @@ import (
 )
 
 type Application struct {
-	ID        uint   `gorm:"primaryKey"`
+	ID        uint   `json:"-" gorm:"primaryKey"`
 	Name      string `json:"name" validate:"required"`
-	Token     string `gorm:"uniqueIndex"`
+	Token     string `json:"token" gorm:"uniqueIndex;size:36"`
 	CreatedAt time.Time
 }
 

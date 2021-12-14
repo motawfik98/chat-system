@@ -10,4 +10,5 @@ func (h *Handler) Routes() {
 		return c.String(http.StatusOK, "Hello World!!")
 	})
 
+	h.router.POST("/application", h.HandleCreateApplication)
 }
