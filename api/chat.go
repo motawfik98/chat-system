@@ -16,7 +16,7 @@ func (h *Handler) HandleCreateChat(c echo.Context) error {
 	if err := c.Validate(chat); err != nil {
 		return err
 	}
-	if err := h.store.CreateChat(chat); err != nil {
+	if err := h.store.CreateChat(c.Request().Context(), chat); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	if err := h.queues.SendChat(chat); err != nil {

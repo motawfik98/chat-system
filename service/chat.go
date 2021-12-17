@@ -5,8 +5,8 @@ import (
 	"context"
 )
 
-func (s *Store) CreateChat(chat *domain.Chat) error {
-	n, err := s.redis.HIncrBy(context.Background(), chat.AppToken, "number-of-chats", 1).Uint64()
+func (s *Store) CreateChat(ctx context.Context, chat *domain.Chat) error {
+	n, err := s.redis.HIncrBy(ctx, chat.AppToken, "number-of-chats", 1).Uint64()
 	if err != nil {
 		return err
 	}
