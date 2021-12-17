@@ -19,6 +19,9 @@ func (h *Handler) HandleCreateApplication(c echo.Context) error {
 	if err := h.dnConn.CreateApplication(application); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
+	if err := h.queues.SendApplication(application); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
 	return c.JSON(http.StatusOK, application)
 }
 

@@ -7,6 +7,7 @@ require (
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/jinzhu/now v1.1.4 // indirect
 	github.com/labstack/echo/v4 v4.6.1 // indirect
+	github.com/streadway/amqp v1.0.0 // indirect
 	gorm.io/driver/mysql v1.2.1 // indirect
 	gorm.io/gorm v1.22.4 // indirect
 )
