@@ -7,14 +7,14 @@ import (
 )
 
 type Handler struct {
-	dnConn *service.Info
+	store  *service.Store
 	queues *rabbitmq.Queues
 	router *echo.Echo
 }
 
-func RegisterAPIHandler(info *service.Info, queues *rabbitmq.Queues, router *echo.Echo) {
+func RegisterAPIHandler(info *service.Store, queues *rabbitmq.Queues, router *echo.Echo) {
 	handler := &Handler{
-		dnConn: info,
+		store:  info,
 		queues: queues,
 		router: router,
 	}

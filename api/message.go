@@ -23,7 +23,7 @@ func (h *Handler) HandleCreateMessage(c echo.Context) error {
 	if err := c.Validate(message); err != nil {
 		return err
 	}
-	if err := h.dnConn.CreateMessage(message); err != nil {
+	if err := h.store.CreateMessage(message); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, message)
@@ -32,7 +32,7 @@ func (h *Handler) HandleCreateMessage(c echo.Context) error {
 func (h *Handler) HandleGetAllMessagesByApplicationAndChat(c echo.Context) error {
 	appToken := c.Param("token")
 	chatNumber := c.Param("number")
-	messages, err := h.dnConn.GetMessagesByApplicationAndChat(appToken, chatNumber)
+	messages, err := h.store.GetMessagesByApplicationAndChat(appToken, chatNumber)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -49,7 +49,7 @@ func (h *Handler) HandleGetMessageByApplicationAndChatAndNumber(c echo.Context) 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadGateway, err.Error())
 	}
-	chats, err := h.dnConn.GetMessageByApplicationAndChatAndNumber(appToken, uint(number), uint(msgNumber))
+	chats, err := h.store.GetMessageByApplicationAndChatAndNumber(appToken, uint(number), uint(msgNumber))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

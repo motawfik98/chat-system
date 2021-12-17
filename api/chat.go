@@ -16,7 +16,7 @@ func (h *Handler) HandleCreateChat(c echo.Context) error {
 	if err := c.Validate(chat); err != nil {
 		return err
 	}
-	if err := h.dnConn.CreateChat(chat); err != nil {
+	if err := h.store.CreateChat(chat); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	if err := h.queues.SendChat(chat); err != nil {
@@ -27,7 +27,7 @@ func (h *Handler) HandleCreateChat(c echo.Context) error {
 
 func (h *Handler) HandleGetAllChatsByApplication(c echo.Context) error {
 	appToken := c.Param("token")
-	chats, err := h.dnConn.GetChatsByApplication(appToken)
+	chats, err := h.store.GetChatsByApplication(appToken)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -40,7 +40,7 @@ func (h *Handler) HandleGetChatByAppTokenAndNumber(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadGateway, err.Error())
 	}
-	chats, err := h.dnConn.GetChatByApplicationAndNumber(appToken, uint(number))
+	chats, err := h.store.GetChatByApplicationAndNumber(appToken, uint(number))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

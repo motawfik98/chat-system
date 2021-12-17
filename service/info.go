@@ -5,11 +5,11 @@ import (
 	"gorm.io/gorm"
 )
 
-type Info struct {
+type Store struct {
 	database *gorm.DB
 	redis    *redis.Client
 }
 
-func NewInfoService(db *gorm.DB, redis *redis.Client) *Info {
-	return &Info{database: db, redis: redis}
+func NewInfoService(db *gorm.DB, redis *redis.Client) *Store {
+	return &Store{database: db, redis: redis}
 }

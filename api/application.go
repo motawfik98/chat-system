@@ -16,7 +16,7 @@ func (h *Handler) HandleCreateApplication(c echo.Context) error {
 	if err := c.Validate(application); err != nil {
 		return err
 	}
-	if err := h.dnConn.CreateApplication(application); err != nil {
+	if err := h.store.CreateApplication(application); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	if err := h.queues.SendApplication(application); err != nil {
@@ -26,7 +26,7 @@ func (h *Handler) HandleCreateApplication(c echo.Context) error {
 }
 
 func (h *Handler) HandleGetAllApplications(c echo.Context) error {
-	applications, err := h.dnConn.GetApplications()
+	applications, err := h.store.GetApplications()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -35,7 +35,7 @@ func (h *Handler) HandleGetAllApplications(c echo.Context) error {
 
 func (h *Handler) HandleGetApplicationByToken(c echo.Context) error {
 	appToken := c.Param("token")
-	application, err := h.dnConn.GetApplicationByToken(appToken)
+	application, err := h.store.GetApplicationByToken(appToken)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return echo.NewHTTPError(http.StatusNotFound, err.Error())
@@ -54,7 +54,7 @@ func (h *Handler) HandleUpdateApplication(c echo.Context) error {
 	if err := c.Validate(application); err != nil {
 		return err
 	}
-	if err := h.dnConn.UpdateApplication(application, appToken); err != nil {
+	if err := h.store.UpdateApplication(application, appToken); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, application)

@@ -5,8 +5,8 @@ import (
 	"context"
 )
 
-func (i *Info) CreateChat(chat *domain.Chat) error {
-	n, err := i.redis.HIncrBy(context.Background(), chat.AppToken, "number-of-chats", 1).Uint64()
+func (s *Store) CreateChat(chat *domain.Chat) error {
+	n, err := s.redis.HIncrBy(context.Background(), chat.AppToken, "number-of-chats", 1).Uint64()
 	if err != nil {
 		return err
 	}
@@ -14,14 +14,14 @@ func (i *Info) CreateChat(chat *domain.Chat) error {
 	return nil
 }
 
-func (i *Info) GetChatsByApplication(appToken string) ([]domain.Chat, error) {
+func (s *Store) GetChatsByApplication(appToken string) ([]domain.Chat, error) {
 	chats := make([]domain.Chat, 0)
-	err := i.database.Where("app_token = ?", appToken).Find(&chats).Error
+	err := s.database.Where("app_token = ?", appToken).Find(&chats).Error
 	return chats, err
 }
 
-func (i *Info) GetChatByApplicationAndNumber(appToken string, number uint) (*domain.Chat, error) {
+func (s *Store) GetChatByApplicationAndNumber(appToken string, number uint) (*domain.Chat, error) {
 	chat := new(domain.Chat)
-	err := i.database.Where("app_token = ? AND number = ?", appToken, number).First(&chat).Error
+	err := s.database.Where("app_token = ? AND number = ?", appToken, number).First(&chat).Error
 	return chat, err
 }
