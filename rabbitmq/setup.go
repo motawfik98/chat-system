@@ -5,6 +5,7 @@ import "github.com/streadway/amqp"
 type Queues struct {
 	Channel          *amqp.Channel
 	ApplicationQueue *amqp.Queue
+	ChatQueue        *amqp.Queue
 }
 
 func SetupRabbitMQ() (*amqp.Connection, *Queues, error) {
@@ -16,17 +17,25 @@ func SetupRabbitMQ() (*amqp.Connection, *Queues, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	appQueue, err := ch.QueueDeclare(
-		"applications",
+	appQueue, err := declareQueue("applications", ch)
+	if err != nil {
+		return nil, nil, err
+	}
+	chatQueue, err := declareQueue("chats", ch)
+	if err != nil {
+		return nil, nil, err
+	}
+	queues := Queues{Channel: ch, ApplicationQueue: &appQueue, ChatQueue: &chatQueue}
+	return conn, &queues, nil
+}
+
+func declareQueue(queueName string, channel *amqp.Channel) (amqp.Queue, error) {
+	return channel.QueueDeclare(
+		queueName,
 		false,
 		false,
 		false,
 		false,
 		nil,
 	)
-	if err != nil {
-		return nil, nil, err
-	}
-	queues := Queues{Channel: ch, ApplicationQueue: &appQueue}
-	return conn, &queues, nil
 }

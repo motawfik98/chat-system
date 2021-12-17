@@ -3,6 +3,7 @@ package main
 import (
 	"chat-system/database"
 	"chat-system/rabbitmq"
+	"chat-system/redis"
 	"chat-system/workers/workers"
 )
 
@@ -19,9 +20,12 @@ func main() {
 		panic(err)
 	}
 
+	rds := redis.SetupRedis()
+
 	forever := make(chan bool)
 
-	go workers.ConsumeApplicationsMessages(queues, db)
+	go workers.ConsumeApplicationsMessages(queues, db, rds)
+	go workers.ConsumeChatsMessages(queues, db, rds)
 
 	<-forever
 

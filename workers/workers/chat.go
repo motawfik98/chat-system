@@ -3,15 +3,16 @@ package workers
 import (
 	"chat-system/rabbitmq"
 	"context"
+	"fmt"
 	"github.com/go-redis/redis/v8"
 	"github.com/streadway/amqp"
 	"gorm.io/gorm"
 	"log"
 )
 
-func ConsumeApplicationsMessages(queues *rabbitmq.Queues, db *gorm.DB, rds *redis.Client) {
+func ConsumeChatsMessages(queues *rabbitmq.Queues, db *gorm.DB, rds *redis.Client) {
 	messages, err := queues.Channel.Consume(
-		queues.ApplicationQueue.Name,
+		queues.ChatQueue.Name,
 		"",
 		false,
 		false,
@@ -27,11 +28,12 @@ func ConsumeApplicationsMessages(queues *rabbitmq.Queues, db *gorm.DB, rds *redi
 	go func() {
 		for d := range messages {
 			go func(d amqp.Delivery) {
-				app, err := queues.ReceiveApplication(d.Body)
+				chat, err := queues.ReceiveChat(d.Body)
 				if err == nil {
-					err = db.Create(app).Error
+					db.Select("id").Table("applications").Where("token = ?", chat.AppToken).Take(&chat.AppID)
+					err = db.Create(chat).Error
 					if err == nil {
-						rds.HSetNX(context.Background(), app.Token, "number-of-chats", 0)
+						rds.HSetNX(context.Background(), fmt.Sprintf("%s-%d", chat.AppToken, chat.Number), "number-of-messages", 0)
 						d.Ack(false)
 					}
 				}

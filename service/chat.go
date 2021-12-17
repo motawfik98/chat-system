@@ -1,9 +1,17 @@
 package service
 
-import "chat-system/domain"
+import (
+	"chat-system/domain"
+	"context"
+)
 
 func (i *Info) CreateChat(chat *domain.Chat) error {
-	return i.database.Create(chat).Error
+	n, err := i.redis.HIncrBy(context.Background(), chat.AppToken, "number-of-chats", 1).Uint64()
+	if err != nil {
+		return err
+	}
+	chat.Number = uint(n)
+	return nil
 }
 
 func (i *Info) GetChatsByApplication(appToken string) ([]domain.Chat, error) {

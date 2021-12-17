@@ -19,6 +19,9 @@ func (h *Handler) HandleCreateChat(c echo.Context) error {
 	if err := h.dnConn.CreateChat(chat); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
+	if err := h.queues.SendChat(chat); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
 	return c.JSON(http.StatusOK, chat)
 }
 

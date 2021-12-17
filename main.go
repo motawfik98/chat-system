@@ -4,6 +4,7 @@ import (
 	"chat-system/api"
 	"chat-system/database"
 	"chat-system/rabbitmq"
+	"chat-system/redis"
 	"chat-system/service"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
@@ -24,7 +25,9 @@ func main() {
 	defer rabbitConn.Close()
 	defer queues.Channel.Close()
 
-	info := service.NewInfoService(db)
+	redisClient := redis.SetupRedis()
+
+	info := service.NewInfoService(db, redisClient)
 	api.RegisterAPIHandler(info, queues, e)
 
 	e.Logger.Fatal(e.Start(":3000"))

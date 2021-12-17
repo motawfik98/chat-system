@@ -4,6 +4,7 @@ go 1.16
 
 require (
 	github.com/go-playground/validator/v10 v10.9.0 // indirect
+	github.com/go-redis/redis/v8 v8.11.4 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/jinzhu/now v1.1.4 // indirect
 	github.com/labstack/echo/v4 v4.6.1 // indirect
