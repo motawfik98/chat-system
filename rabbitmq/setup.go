@@ -1,6 +1,9 @@
 package rabbitmq
 
-import "github.com/streadway/amqp"
+import (
+	"github.com/streadway/amqp"
+	"os"
+)
 
 type Queues struct {
 	Channel          *amqp.Channel
@@ -10,7 +13,7 @@ type Queues struct {
 }
 
 func Setup() (*amqp.Connection, *Queues, error) {
-	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	conn, err := amqp.Dial(os.ExpandEnv("amqp://guest:guest@${RABBITMQ_HOST}:${RABBITMQ_PORT}/"))
 	if err != nil {
 		return nil, nil, err
 	}

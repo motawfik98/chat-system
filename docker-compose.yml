@@ -1,0 +1,76 @@
+version: "3.9"
+
+services:
+  db:
+    image: mysql:5.7
+    volumes:
+      - db_data:/var/lib/mysql
+    container_name: instabugDB
+#    restart: always
+    ports:
+      - '3308:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: DockerChat*PassRoot
+      MYSQL_DATABASE: docker_chat_system
+      MYSQL_USER: docker_chat
+      MYSQL_PASSWORD: DockerChat*Pass
+
+  rabbitmq:
+    image: rabbitmq:3.9-management
+    container_name: rabbitmq
+    ports:
+      - "5675:5672"
+      - "15675:15672"
+    environment:
+      - RABBITMQ_SECURE_PASSWORD=yes
+    volumes:
+      - rabbitmq_data:/bitnami/rabbitmq/mnesia
+
+
+  redis:
+    image: redis:latest
+    container_name: instabugRedis
+
+  webserver:
+    depends_on:
+      - rabbitmq
+      - redis
+      - db
+    build: .
+    container_name: instabugWebServer
+    ports:
+      - "3000:3000"
+    restart: on-failure
+    environment:
+      DB_HOST: instabugDB
+      DB_USERNAME: docker_chat
+      DB_PASSWORD: DockerChat*Pass
+      DB_NAME: docker_chat_system
+      DB_PORT: 3306
+      RABBITMQ_PORT: 5672
+      RABBITMQ_HOST: rabbitmq
+      REDIS_HOST: redis
+
+  workers:
+    depends_on:
+      - rabbitmq
+      - redis
+      - db
+    build:
+      context: .
+      dockerfile: ./workers/Dockerfile
+    container_name: instabugWorkers
+    restart: on-failure
+    environment:
+      DB_HOST: instabugDB
+      DB_USERNAME: docker_chat
+      DB_PASSWORD: DockerChat*Pass
+      DB_NAME: docker_chat_system
+      DB_PORT: 3306
+      RABBITMQ_PORT: 5672
+      RABBITMQ_HOST: rabbitmq
+      REDIS_HOST: redis
+
+volumes:
+  db_data: {}
+  rabbitmq_data: {}
