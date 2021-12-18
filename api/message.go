@@ -23,7 +23,10 @@ func (h *Handler) HandleCreateMessage(c echo.Context) error {
 	if err := c.Validate(message); err != nil {
 		return err
 	}
-	if err := h.store.CreateMessage(message); err != nil {
+	if err := h.store.CreateMessage(c.Request().Context(), message); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	if err := h.queues.SendMessage(message); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, message)

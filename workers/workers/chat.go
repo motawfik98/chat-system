@@ -36,7 +36,7 @@ func ConsumeChatsMessages(queues *rabbitmq.Queues, db *gorm.DB, rds *redis.Clien
 					if err == nil {
 						chatsCount := rds.HIncrBy(context.Background(), chat.AppToken, domain.TOTAL_CHATS, 1).Val()
 						db.Table("applications").Where("id = ?", chat.AppID).Update("chats_count", chatsCount)
-						rds.HSetNX(context.Background(), fmt.Sprintf("%s-%d", chat.AppToken, chat.Number), "number-of-messages", 0)
+						rds.HSetNX(context.Background(), fmt.Sprintf("%s-%d", chat.AppToken, chat.Number), domain.TOTAL_MESSAGES, 0)
 						d.Ack(false)
 					}
 				}

@@ -1,9 +1,18 @@
 package service
 
-import "chat-system/domain"
+import (
+	"chat-system/domain"
+	"context"
+	"fmt"
+)
 
-func (s *Store) CreateMessage(message *domain.Message) error {
-	return s.database.Create(message).Error
+func (s *Store) CreateMessage(ctx context.Context, message *domain.Message) error {
+	n, err := s.redis.HIncrBy(ctx, fmt.Sprintf("%s-%d", message.AppToken, message.ChatNumber), domain.MAX_MESSAGE_NUMBER, 1).Uint64()
+	if err != nil {
+		return err
+	}
+	message.Number = uint(n)
+	return nil
 }
 
 func (s *Store) GetMessagesByApplicationAndChat(appToken, chatNumber string) ([]domain.Message, error) {

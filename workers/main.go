@@ -26,6 +26,7 @@ func main() {
 
 	go workers.ConsumeApplicationsMessages(queues, db, rds)
 	go workers.ConsumeChatsMessages(queues, db, rds)
+	go workers.ConsumeMessages(queues, db, rds)
 
 	<-forever
 

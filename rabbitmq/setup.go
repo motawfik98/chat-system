@@ -6,6 +6,7 @@ type Queues struct {
 	Channel          *amqp.Channel
 	ApplicationQueue *amqp.Queue
 	ChatQueue        *amqp.Queue
+	MessageQueue     *amqp.Queue
 }
 
 func SetupRabbitMQ() (*amqp.Connection, *Queues, error) {
@@ -25,7 +26,11 @@ func SetupRabbitMQ() (*amqp.Connection, *Queues, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	queues := Queues{Channel: ch, ApplicationQueue: &appQueue, ChatQueue: &chatQueue}
+	messageQueue, err := declareQueue("messages", ch)
+	if err != nil {
+		return nil, nil, err
+	}
+	queues := Queues{Channel: ch, ApplicationQueue: &appQueue, ChatQueue: &chatQueue, MessageQueue: &messageQueue}
 	return conn, &queues, nil
 }
 
