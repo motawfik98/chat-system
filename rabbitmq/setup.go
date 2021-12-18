@@ -9,7 +9,7 @@ type Queues struct {
 	MessageQueue     *amqp.Queue
 }
 
-func SetupRabbitMQ() (*amqp.Connection, *Queues, error) {
+func Setup() (*amqp.Connection, *Queues, error) {
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
 	if err != nil {
 		return nil, nil, err

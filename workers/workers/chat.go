@@ -11,7 +11,7 @@ import (
 	"log"
 )
 
-func ConsumeChatsMessages(queues *rabbitmq.Queues, db *gorm.DB, rds *redis.Client) {
+func ConsumeChats(queues *rabbitmq.Queues, db *gorm.DB, rds *redis.Client) {
 	messages, err := queues.Channel.Consume(
 		queues.ChatQueue.Name,
 		"",

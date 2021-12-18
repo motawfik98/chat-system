@@ -18,14 +18,14 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	rabbitConn, queues, err := rabbitmq.SetupRabbitMQ()
+	rabbitConn, queues, err := rabbitmq.Setup()
 	if err != nil {
 		panic(err)
 	}
 	defer rabbitConn.Close()
 	defer queues.Channel.Close()
 
-	redisClient := redis.SetupRedis()
+	redisClient := redis.Setup()
 
 	info := service.NewInfoService(db, redisClient)
 	api.RegisterAPIHandler(info, queues, e)

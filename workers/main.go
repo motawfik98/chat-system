@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	rabbitConn, queues, err := rabbitmq.SetupRabbitMQ()
+	rabbitConn, queues, err := rabbitmq.Setup()
 	if err != nil {
 		panic(err)
 	}
@@ -20,12 +20,12 @@ func main() {
 		panic(err)
 	}
 
-	rds := redis.SetupRedis()
+	rds := redis.Setup()
 
 	forever := make(chan bool)
 
-	go workers.ConsumeApplicationsMessages(queues, db, rds)
-	go workers.ConsumeChatsMessages(queues, db, rds)
+	go workers.ConsumeApplications(queues, db, rds)
+	go workers.ConsumeChats(queues, db, rds)
 	go workers.ConsumeMessages(queues, db, rds)
 
 	<-forever

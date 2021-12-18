@@ -10,7 +10,7 @@ import (
 	"log"
 )
 
-func ConsumeApplicationsMessages(queues *rabbitmq.Queues, db *gorm.DB, rds *redis.Client) {
+func ConsumeApplications(queues *rabbitmq.Queues, db *gorm.DB, rds *redis.Client) {
 	messages, err := queues.Channel.Consume(
 		queues.ApplicationQueue.Name,
 		"",
