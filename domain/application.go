@@ -5,7 +5,7 @@ import (
 )
 
 type Application struct {
-	ID         string     `json:"-" gorm:"primaryKey;autoIncrement:false"`
+	ID         uint       `json:"-" gorm:"primaryKey"`
 	Name       string     `json:"name" validate:"required"`
 	Token      string     `json:"token" gorm:"uniqueIndex;size:36"`
 	ChatsCount uint       `json:"chatsCount"`

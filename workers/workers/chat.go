@@ -31,7 +31,6 @@ func ConsumeChats(queues *rabbitmq.Queues, db *gorm.DB, rds *redis.Client) {
 			go func(d amqp.Delivery) {
 				chat, err := queues.ReceiveChat(d.Body)
 				if err == nil {
-					db.Select("id").Table("applications").Where("token = ?", chat.AppToken).Take(&chat.AppID)
 					err = db.Create(chat).Error
 					if err == nil {
 						chatsCount := rds.HIncrBy(context.Background(), chat.AppToken, domain.TOTAL_CHATS, 1).Val()

@@ -3,12 +3,15 @@ package rabbitmq
 import (
 	"chat-system/domain"
 	"encoding/json"
-	"github.com/google/uuid"
 	"github.com/streadway/amqp"
 )
 
 func (q *Queues) SendChat(chat *domain.Chat) error {
-	bytes, err := json.Marshal(chat)
+	// custom Marshal to send AppID to queue
+	bytes, err := json.Marshal(struct {
+		*domain.Chat
+		AppID uint
+	}{chat, chat.AppID})
 	if err != nil {
 		return err
 	}
@@ -25,15 +28,17 @@ func (q *Queues) SendChat(chat *domain.Chat) error {
 }
 
 func (q *Queues) ReceiveChat(bytes []byte) (*domain.Chat, error) {
-	chat := new(domain.Chat)
-	err := json.Unmarshal(bytes, chat)
+	type chatWithIDs struct {
+		*domain.Chat
+		AppID uint
+	}
+	chat := new(chatWithIDs)
+	err := json.Unmarshal(bytes, &chat)
+
 	if err != nil {
 		return nil, err
 	}
-	u, err := uuid.NewRandom()
-	if err != nil {
-		return nil, err
-	}
-	chat.ID = u.String()
-	return chat, nil
+	chat.Chat.AppID = chat.AppID
+	return chat.Chat, nil
+
 }

@@ -3,9 +3,14 @@ package service
 import (
 	"chat-system/domain"
 	"context"
+	"errors"
 )
 
 func (s *Store) CreateChat(ctx context.Context, chat *domain.Chat) error {
+	s.database.Select("id").Table("applications").Where("token = ?", chat.AppToken).Scan(&chat.AppID)
+	if chat.AppID == 0 {
+		return errors.New("unable to find specified app token")
+	}
 	n, err := s.redis.HIncrBy(ctx, chat.AppToken, domain.MAX_CHAT_NUMBER, 1).Uint64()
 	if err != nil {
 		return err

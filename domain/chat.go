@@ -10,11 +10,11 @@ const (
 )
 
 type Chat struct {
-	ID            string      `json:"-" gorm:"primaryKey;autoIncrement:false"`
-	AppToken      string      `json:"appToken" gorm:"uniqueIndex:number_token;size:36"`
-	Number        uint        `json:"number" gorm:"uniqueIndex:number_token"`
-	AppID         string      `json:"-" gorm:"size:36"`
+	ID            uint        `json:"-" gorm:"primaryKey"`
+	AppID         uint        `json:"-" gorm:"uniqueIndex:appID_chatNo"`
+	Number        uint        `json:"number" gorm:"uniqueIndex:appID_chatNo"`
 	App           Application `json:"-" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:AppID;references:ID" validate:"required,nostructlevel"`
+	AppToken      string      `json:"appToken" gorm:"-"`
 	Title         string      `json:"title" validate:"required"`
 	MessagesCount uint        `json:"messagesCount"`
 	CreatedAt     *time.Time  `json:",omitempty"`

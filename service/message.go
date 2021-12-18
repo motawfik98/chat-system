@@ -3,10 +3,16 @@ package service
 import (
 	"chat-system/domain"
 	"context"
+	"errors"
 	"fmt"
 )
 
 func (s *Store) CreateMessage(ctx context.Context, message *domain.Message) error {
+	s.database.Select("id").Table("applications").Where("token = ?", message.AppToken).Scan(&message.AppID)
+	s.database.Select("id").Table("chats").Where("app_id = ? AND number = ?", message.AppID, message.ChatNumber).Scan(&message.ChatID)
+	if message.AppID == 0 || message.ChatID == 0 {
+		return errors.New("unable to find specified app token and/or chat number")
+	}
 	n, err := s.redis.HIncrBy(ctx, fmt.Sprintf("%s-%d", message.AppToken, message.ChatNumber), domain.MAX_MESSAGE_NUMBER, 1).Uint64()
 	if err != nil {
 		return err

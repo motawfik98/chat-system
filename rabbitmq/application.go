@@ -3,7 +3,6 @@ package rabbitmq
 import (
 	"chat-system/domain"
 	"encoding/json"
-	"github.com/google/uuid"
 	"github.com/streadway/amqp"
 )
 
@@ -30,10 +29,5 @@ func (q *Queues) ReceiveApplication(bytes []byte) (*domain.Application, error) {
 	if err != nil {
 		return nil, err
 	}
-	u, err := uuid.NewRandom()
-	if err != nil {
-		return nil, err
-	}
-	app.ID = u.String()
 	return app, nil
 }
