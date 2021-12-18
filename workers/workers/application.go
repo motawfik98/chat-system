@@ -1,6 +1,7 @@
 package workers
 
 import (
+	"chat-system/domain"
 	"chat-system/rabbitmq"
 	"context"
 	"github.com/go-redis/redis/v8"
@@ -31,7 +32,8 @@ func ConsumeApplicationsMessages(queues *rabbitmq.Queues, db *gorm.DB, rds *redi
 				if err == nil {
 					err = db.Create(app).Error
 					if err == nil {
-						rds.HSetNX(context.Background(), app.Token, "number-of-chats", 0)
+						rds.HSetNX(context.Background(), app.Token, domain.TOTAL_CHATS, 0)
+						rds.HSetNX(context.Background(), app.Token, domain.MAX_CHAT_NUMBER, 0)
 						d.Ack(false)
 					}
 				}

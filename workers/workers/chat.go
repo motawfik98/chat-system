@@ -1,6 +1,7 @@
 package workers
 
 import (
+	"chat-system/domain"
 	"chat-system/rabbitmq"
 	"context"
 	"fmt"
@@ -33,6 +34,8 @@ func ConsumeChatsMessages(queues *rabbitmq.Queues, db *gorm.DB, rds *redis.Clien
 					db.Select("id").Table("applications").Where("token = ?", chat.AppToken).Take(&chat.AppID)
 					err = db.Create(chat).Error
 					if err == nil {
+						chatsCount := rds.HIncrBy(context.Background(), chat.AppToken, domain.TOTAL_CHATS, 1).Val()
+						db.Table("applications").Where("id = ?", chat.AppID).Update("chats_count", chatsCount)
 						rds.HSetNX(context.Background(), fmt.Sprintf("%s-%d", chat.AppToken, chat.Number), "number-of-messages", 0)
 						d.Ack(false)
 					}

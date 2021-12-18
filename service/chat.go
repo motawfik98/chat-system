@@ -6,7 +6,7 @@ import (
 )
 
 func (s *Store) CreateChat(ctx context.Context, chat *domain.Chat) error {
-	n, err := s.redis.HIncrBy(ctx, chat.AppToken, "number-of-chats", 1).Uint64()
+	n, err := s.redis.HIncrBy(ctx, chat.AppToken, domain.MAX_CHAT_NUMBER, 1).Uint64()
 	if err != nil {
 		return err
 	}
