@@ -9,9 +9,8 @@ import (
 func (q *Queues) SendMessage(message *domain.Message) error {
 	bytes, err := json.Marshal(struct {
 		*domain.Message
-		AppID  uint
 		ChatID uint
-	}{message, message.AppID, message.ChatID})
+	}{message, message.ChatID})
 	if err != nil {
 		return err
 	}
@@ -30,7 +29,7 @@ func (q *Queues) SendMessage(message *domain.Message) error {
 func (q *Queues) ReceiveMessage(bytes []byte) (*domain.Message, error) {
 	type messageWithIDs struct {
 		*domain.Message
-		AppID uint
+		AppID  uint
 		ChatID uint
 	}
 	message := new(messageWithIDs)
@@ -38,7 +37,6 @@ func (q *Queues) ReceiveMessage(bytes []byte) (*domain.Message, error) {
 	if err != nil {
 		return nil, err
 	}
-	message.Message.AppID = message.AppID
 	message.Message.ChatID = message.ChatID
 
 	return message.Message, nil

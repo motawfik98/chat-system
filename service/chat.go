@@ -21,12 +21,14 @@ func (s *Store) CreateChat(ctx context.Context, chat *domain.Chat) error {
 
 func (s *Store) GetChatsByApplication(appToken string) ([]domain.Chat, error) {
 	chats := make([]domain.Chat, 0)
-	err := s.database.Where("app_token = ?", appToken).Find(&chats).Error
+	subQuery := s.database.Table("applications").Select("id").Where("token = ?", appToken)
+	err := s.database.Select("*, ? AS app_token", appToken).Where("app_id = (?)", subQuery).Find(&chats).Error
 	return chats, err
 }
 
 func (s *Store) GetChatByApplicationAndNumber(appToken string, number uint) (*domain.Chat, error) {
 	chat := new(domain.Chat)
-	err := s.database.Where("app_token = ? AND number = ?", appToken, number).First(&chat).Error
+	subQuery := s.database.Table("applications").Select("id").Where("token = ?", appToken)
+	err := s.database.Select("*, ? AS app_token", appToken).Where("app_id = (?) AND number = ?", subQuery, number).First(&chat).Error
 	return chat, err
 }

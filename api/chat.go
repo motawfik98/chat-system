@@ -2,14 +2,15 @@ package api
 
 import (
 	"chat-system/domain"
+	"errors"
 	"github.com/labstack/echo/v4"
+	"gorm.io/gorm"
 	"net/http"
 	"strconv"
 )
 
 func (h *Handler) HandleCreateChat(c echo.Context) error {
-	appToken := c.Param("token")
-	chat := &domain.Chat{AppToken: appToken}
+	chat := new(domain.Chat)
 	if err := c.Bind(chat); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -42,6 +43,9 @@ func (h *Handler) HandleGetChatByAppTokenAndNumber(c echo.Context) error {
 	}
 	chats, err := h.store.GetChatByApplicationAndNumber(appToken, uint(number))
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		}
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, chats)

@@ -8,15 +8,7 @@ import (
 )
 
 func (h *Handler) HandleCreateMessage(c echo.Context) error {
-	appToken := c.Param("token")
-	chatNumber, err := strconv.ParseUint(c.Param("number"), 10, 64)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-	message := &domain.Message{
-		AppToken:   appToken,
-		ChatNumber: uint(chatNumber),
-	}
+	message := new(domain.Message)
 	if err := c.Bind(message); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
