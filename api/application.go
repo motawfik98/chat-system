@@ -2,6 +2,7 @@ package api
 
 import (
 	"chat-system/domain"
+	"chat-system/rabbitmq"
 	"errors"
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
@@ -19,7 +20,7 @@ func (h *Handler) HandleCreateApplication(c echo.Context) error {
 	if err := h.store.CreateApplication(application); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
-	if err := h.queues.SendApplication(application); err != nil {
+	if err := h.queues.SendApplication(application, rabbitmq.Create); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, application)
@@ -46,7 +47,6 @@ func (h *Handler) HandleGetApplicationByToken(c echo.Context) error {
 }
 
 func (h *Handler) HandleUpdateApplication(c echo.Context) error {
-	appToken := c.Param("token")
 	application := new(domain.Application)
 	if err := c.Bind(application); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -54,7 +54,10 @@ func (h *Handler) HandleUpdateApplication(c echo.Context) error {
 	if err := c.Validate(application); err != nil {
 		return err
 	}
-	if err := h.store.UpdateApplication(application, appToken); err != nil {
+	if err := h.store.UpdateApplication(application); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	if err := h.queues.SendApplication(application, rabbitmq.Update); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, application)
