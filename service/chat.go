@@ -19,6 +19,15 @@ func (s *Store) CreateChat(ctx context.Context, chat *domain.Chat) error {
 	return nil
 }
 
+func (s *Store) UpdateChat(chat *domain.Chat) error {
+	subQuery := s.database.Table("applications").Select("id").Where("token = ?", chat.AppToken)
+	s.database.Select("id").Table("chats").Where("app_id = (?) AND number = ?", subQuery, chat.Number).Scan(&chat.ID)
+	if chat.ID == 0 {
+		return errors.New("cannot find specified application/chat combination")
+	}
+	return nil
+}
+
 func (s *Store) GetChatsByApplication(appToken string) ([]domain.Chat, error) {
 	chats := make([]domain.Chat, 0)
 	subQuery := s.database.Table("applications").Select("id").Where("token = ?", appToken)

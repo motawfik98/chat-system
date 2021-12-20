@@ -29,14 +29,19 @@ func ConsumeChats(queues *rabbitmq.Queues, db *gorm.DB, rds *redis.Client) {
 	go func() {
 		for d := range messages {
 			go func(d amqp.Delivery) {
-				chat, err := queues.ReceiveChat(d.Body)
+				chat, action, err := queues.ReceiveChat(d.Body)
 				if err == nil {
-					err = db.Create(chat).Error
-					if err == nil {
-						chatsCount := rds.HIncrBy(context.Background(), chat.AppToken, domain.TOTAL_CHATS, 1).Val()
-						db.Table("applications").Where("id = ?", chat.AppID).Update("chats_count", chatsCount)
-						rds.HSetNX(context.Background(), fmt.Sprintf("%s-%d", chat.AppToken, chat.Number), domain.TOTAL_MESSAGES, 0)
-						d.Ack(false)
+					if action == rabbitmq.Create {
+						if err = db.Create(chat).Error; err == nil {
+							chatsCount := rds.HIncrBy(context.Background(), chat.AppToken, domain.TOTAL_CHATS, 1).Val()
+							db.Table("applications").Where("id = ?", chat.AppID).Update("chats_count", chatsCount)
+							rds.HSetNX(context.Background(), fmt.Sprintf("%s-%d", chat.AppToken, chat.Number), domain.TOTAL_MESSAGES, 0)
+							d.Ack(false)
+						}
+					} else if action == rabbitmq.Update {
+						if err := db.Model(chat).Update("title", chat.Title).Error; err == nil {
+							d.Ack(false)
+						}
 					}
 				}
 			}(d)
