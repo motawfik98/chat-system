@@ -55,7 +55,7 @@ func (s *Store) GetMessageByApplicationAndChatAndNumber(appToken string, number,
 	return message, err
 }
 
-func (s *Store) SearchMessages(ctx context.Context, appToken string, number uint, message string) ([]domain.Message, error) {
+func (s *Store) SearchMessages(ctx context.Context, number uint, appToken, message, operator string) ([]domain.Message, error) {
 	var id int64
 	appIDSubQuery := s.database.Select("id").Table("applications").Where("token = ?", appToken)
 	s.database.Select("id").Table("chats").Where("app_id = (?) AND number = ?", appIDSubQuery, number).Count(&id)
@@ -63,7 +63,7 @@ func (s *Store) SearchMessages(ctx context.Context, appToken string, number uint
 		return nil, errors.New("unable to find specified app token and chat number combination")
 	}
 	var buf bytes.Buffer
-	query := elasticdomain.CreateQuery(message)
+	query := elasticdomain.CreateQuery(message, operator)
 	if err := json.NewEncoder(&buf).Encode(query); err != nil {
 		return nil, err
 	}

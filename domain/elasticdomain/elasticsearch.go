@@ -2,15 +2,17 @@ package elasticdomain
 
 import "chat-system/domain"
 
-type match map[string]interface{}
-type query map[string]match
-type Search map[string]query
+type hash map[string]interface{}
+type Search map[string]hash
 
-func CreateQuery(message string) Search {
+func CreateQuery(message, operator string) Search {
 	return Search{
-		"query": query{
-			"match": match{
-				"message": message,
+		"query": hash{
+			"match": hash{
+				"message": hash{
+					"query":    message,
+					"operator": operator,
+				},
 			},
 		},
 	}

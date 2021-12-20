@@ -6,6 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 func (h *Handler) HandleCreateMessage(c echo.Context) error {
@@ -59,7 +60,14 @@ func (h *Handler) HandleSearchMessages(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadGateway, err.Error())
 	}
 	searchTerm := c.FormValue("message")
-	messages, err := h.store.SearchMessages(c.Request().Context(), appToken, uint(number), searchTerm)
+	operator := c.FormValue("operator")
+	if len(strings.TrimSpace(operator)) == 0 {
+		operator = "and"
+	}
+	if operator != "and" && operator != "or" {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid option for operator field. valid: (and/or)")
+	}
+	messages, err := h.store.SearchMessages(c.Request().Context(), uint(number), appToken, searchTerm, operator)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
