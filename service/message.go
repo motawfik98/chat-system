@@ -40,7 +40,7 @@ func (s *Store) GetMessageByApplicationAndChatAndNumber(appToken string, number,
 	s.database.Select("id").Table("applications").Where("token = ?", appToken).Scan(&appID)
 	chatIDSubQuery := s.database.Select("id").Table("chats").Where("app_id = ? AND number = ?", appID, number)
 	err := s.database.Select("*, ? AS app_token, ? AS chat_number", appToken, number).
-		Where("app_id = ? AND chat_id = (?) AND number = ?", appID, chatIDSubQuery, msgNumber).First(&message).Error
+		Where("chat_id = (?) AND number = ?", chatIDSubQuery, msgNumber).First(&message).Error
 	return message, err
 }
 
