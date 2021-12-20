@@ -6,11 +6,13 @@ import (
 	"github.com/streadway/amqp"
 )
 
-func (q *Queues) SendMessage(message *domain.Message) error {
+func (q *Queues) SendMessage(message *domain.Message, action Action) error {
 	bytes, err := json.Marshal(struct {
 		*domain.Message
+		ID     uint
 		ChatID uint
-	}{message, message.ChatID})
+		Action Action
+	}{message, message.ID, message.ChatID, action})
 	if err != nil {
 		return err
 	}
@@ -26,18 +28,20 @@ func (q *Queues) SendMessage(message *domain.Message) error {
 		})
 }
 
-func (q *Queues) ReceiveMessage(bytes []byte) (*domain.Message, error) {
+func (q *Queues) ReceiveMessage(bytes []byte) (*domain.Message, Action, error) {
 	type messageWithIDs struct {
 		*domain.Message
-		AppID  uint
+		ID     uint
 		ChatID uint
+		Action Action
 	}
 	message := new(messageWithIDs)
 	err := json.Unmarshal(bytes, message)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
+	message.Message.ID = message.ID
 	message.Message.ChatID = message.ChatID
 
-	return message.Message, nil
+	return message.Message, message.Action, nil
 }
