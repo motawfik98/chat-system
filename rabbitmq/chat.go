@@ -6,12 +6,14 @@ import (
 	"github.com/streadway/amqp"
 )
 
-func (q *Queues) SendChat(chat *domain.Chat) error {
+func (q *Queues) SendChat(chat *domain.Chat, action Action) error {
 	// custom Marshal to send AppID to queue
 	bytes, err := json.Marshal(struct {
 		*domain.Chat
-		AppID uint
-	}{chat, chat.AppID})
+		ID     uint
+		AppID  uint
+		Action Action
+	}{chat, chat.ID, chat.AppID, action})
 	if err != nil {
 		return err
 	}
@@ -27,18 +29,21 @@ func (q *Queues) SendChat(chat *domain.Chat) error {
 		})
 }
 
-func (q *Queues) ReceiveChat(bytes []byte) (*domain.Chat, error) {
+func (q *Queues) ReceiveChat(bytes []byte) (*domain.Chat, Action, error) {
 	type chatWithIDs struct {
 		*domain.Chat
-		AppID uint
+		ID     uint
+		AppID  uint
+		Action Action
 	}
 	chat := new(chatWithIDs)
 	err := json.Unmarshal(bytes, &chat)
 
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	chat.Chat.AppID = chat.AppID
-	return chat.Chat, nil
+	chat.Chat.ID = chat.ID
+	return chat.Chat, chat.Action, nil
 
 }
