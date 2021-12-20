@@ -12,6 +12,13 @@ type Queues struct {
 	MessageQueue     *amqp.Queue
 }
 
+type Action int
+
+const (
+	Create Action = iota
+	Update
+)
+
 func Setup() (*amqp.Connection, *Queues, error) {
 	conn, err := amqp.Dial(os.ExpandEnv("amqp://guest:guest@${RABBITMQ_HOST}:${RABBITMQ_PORT}/"))
 	if err != nil {

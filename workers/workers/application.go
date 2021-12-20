@@ -28,13 +28,18 @@ func ConsumeApplications(queues *rabbitmq.Queues, db *gorm.DB, rds *redis.Client
 	go func() {
 		for d := range messages {
 			go func(d amqp.Delivery) {
-				app, err := queues.ReceiveApplication(d.Body)
+				app, err, action := queues.ReceiveApplication(d.Body)
 				if err == nil {
-					err = db.Create(app).Error
-					if err == nil {
-						rds.HSetNX(context.Background(), app.Token, domain.TOTAL_CHATS, 0)
-						rds.HSetNX(context.Background(), app.Token, domain.MAX_CHAT_NUMBER, 0)
-						d.Ack(false)
+					if action == rabbitmq.Create {
+						if err := db.Create(app).Error; err == nil {
+							rds.HSetNX(context.Background(), app.Token, domain.TOTAL_CHATS, 0)
+							rds.HSetNX(context.Background(), app.Token, domain.MAX_CHAT_NUMBER, 0)
+							d.Ack(false)
+						}
+					} else {
+						if err := db.Model(app).Update("name", app.Name).Error; err == nil {
+							d.Ack(false)
+						}
 					}
 				}
 			}(d)

@@ -3,6 +3,7 @@ package service
 import (
 	"chat-system/domain"
 	"crypto/md5"
+	"errors"
 	"fmt"
 	"github.com/google/uuid"
 	"io"
@@ -23,8 +24,12 @@ func (s *Store) CreateApplication(application *domain.Application) error {
 	return nil
 }
 
-func (s *Store) UpdateApplication(application *domain.Application, token string) error {
-	return s.database.Model(&domain.Application{}).Where("token = ?", token).Update("name", application.Name).Scan(application).Error
+func (s *Store) UpdateApplication(application *domain.Application) error {
+	s.database.Select("id").Table("applications").Where("token = ?", application.Token).Scan(&application.ID)
+	if application.ID == 0 {
+		return errors.New("cannot find application with the specified token")
+	}
+	return nil
 }
 
 func (s *Store) GetApplications() ([]domain.Application, error) {

@@ -6,8 +6,12 @@ import (
 	"github.com/streadway/amqp"
 )
 
-func (q *Queues) SendApplication(app *domain.Application) error {
-	bytes, err := json.Marshal(app)
+func (q *Queues) SendApplication(app *domain.Application, action Action) error {
+	bytes, err := json.Marshal(struct {
+		*domain.Application
+		ID     uint
+		Action Action
+	}{app, app.ID, action})
 	if err != nil {
 		return err
 	}
@@ -23,11 +27,17 @@ func (q *Queues) SendApplication(app *domain.Application) error {
 		})
 }
 
-func (q *Queues) ReceiveApplication(bytes []byte) (*domain.Application, error) {
-	app := new(domain.Application)
-	err := json.Unmarshal(bytes, app)
-	if err != nil {
-		return nil, err
+func (q *Queues) ReceiveApplication(bytes []byte) (*domain.Application, error, Action) {
+	type app struct {
+		*domain.Application
+		ID     uint
+		Action Action
 	}
-	return app, nil
+	application := new(app)
+	err := json.Unmarshal(bytes, application)
+	if err != nil {
+		return nil, err, 0
+	}
+	application.Application.ID = application.ID
+	return application.Application, nil, application.Action
 }
