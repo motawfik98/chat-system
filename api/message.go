@@ -50,3 +50,17 @@ func (h *Handler) HandleGetMessageByApplicationAndChatAndNumber(c echo.Context) 
 	}
 	return c.JSON(http.StatusOK, chats)
 }
+
+func (h *Handler) HandleSearchMessages(c echo.Context) error {
+	appToken := c.Param("token")
+	number, err := strconv.ParseUint(c.Param("number"), 10, 64)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadGateway, err.Error())
+	}
+	searchTerm := c.FormValue("message")
+	messages, err := h.store.SearchMessages(c.Request().Context(), appToken, uint(number), searchTerm)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, messages)
+}
