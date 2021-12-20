@@ -6,6 +6,7 @@ import (
 	"chat-system/rabbitmq"
 	"chat-system/redis"
 	"chat-system/service"
+	"github.com/elastic/go-elasticsearch/v8"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 )
@@ -27,7 +28,12 @@ func main() {
 
 	redisClient := redis.Setup()
 
-	info := service.NewInfoService(db, redisClient)
+	esClient, err := elasticsearch.NewDefaultClient()
+	if err != nil {
+		panic(err)
+	}
+
+	info := service.NewInfoService(db, redisClient, esClient)
 	api.RegisterAPIHandler(info, queues, e)
 
 	e.Logger.Fatal(e.Start(":3000"))

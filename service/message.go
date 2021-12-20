@@ -1,8 +1,11 @@
 package service
 
 import (
+	"bytes"
 	"chat-system/domain"
+	"chat-system/domain/elasticdomain"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 )
@@ -39,4 +42,51 @@ func (s *Store) GetMessageByApplicationAndChatAndNumber(appToken string, number,
 	err := s.database.Select("*, ? AS app_token, ? AS chat_number", appToken, number).
 		Where("app_id = ? AND chat_id = (?) AND number = ?", appID, chatIDSubQuery, msgNumber).First(&message).Error
 	return message, err
+}
+
+func (s *Store) SearchMessages(ctx context.Context, appToken string, number uint, message string) ([]domain.Message, error) {
+	var id int64
+	appIDSubQuery := s.database.Select("id").Table("applications").Where("token = ?", appToken)
+	s.database.Select("id").Table("chats").Where("app_id = (?) AND number = ?", appIDSubQuery, number).Count(&id)
+	if id == 0 {
+		return nil, errors.New("unable to find specified app token and chat number combination")
+	}
+	var buf bytes.Buffer
+	query := elasticdomain.CreateQuery(message)
+	if err := json.NewEncoder(&buf).Encode(query); err != nil {
+		return nil, err
+	}
+	// Perform the search request.
+	res, err := s.es.Search(
+		s.es.Search.WithContext(ctx),
+		s.es.Search.WithIndex("messages"),
+		s.es.Search.WithBody(&buf),
+		s.es.Search.WithTrackTotalHits(true),
+		s.es.Search.WithPretty(),
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	if res.IsError() {
+		var e map[string]interface{}
+		if err := json.NewDecoder(res.Body).Decode(&e); err != nil {
+			return nil, err
+		}
+		// Print the response status and error information.
+		return nil, errors.New(fmt.Sprintf("[%s] %s: %s",
+			res.Status(),
+			e["error"].(map[string]interface{})["type"],
+			e["error"].(map[string]interface{})["reason"],
+		))
+
+	}
+
+	response := new(elasticdomain.SuccessResponse)
+
+	if err := json.NewDecoder(res.Body).Decode(&response); err != nil {
+		return nil, err
+	}
+	return response.GetMessages(appToken, number), nil
 }
