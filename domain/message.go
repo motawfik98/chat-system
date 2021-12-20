@@ -18,4 +18,5 @@ type Message struct {
 	AppToken   string     `json:"appToken,omitempty" gorm:"-:migration;<-:false" param:"token"`
 	ChatNumber uint       `json:"chatNumber,omitempty" gorm:"-:migration;<-:false" param:"number"`
 	CreatedAt  *time.Time `json:",omitempty"`
+	UpdatedAt  *time.Time `json:",omitempty"`
 }

@@ -73,6 +73,46 @@ services:
       RABBITMQ_HOST: rabbitmq
       REDIS_HOST: redis
 
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.16.1
+    container_name: instabugElasticsearch
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - ./volumes/elasticsearch/data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10k"
+        max-file: "10"
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.16.1
+    container_name: instabugKibana
+    environment:
+      - "ELASTICSEARCH_URL=http://elasticsearch:9200"
+      - "SERVER_NAME=127.0.0.1"
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+  logstash:
+    build:
+      context: .
+      dockerfile: ./logstash/Dockerfile
+    container_name: instabugLogstash
+    depends_on:
+      - db
+      - elasticsearch
+    volumes:
+      - ./logstash/pipeline/:/usr/share/logstash/pipeline/
+      - ./logstash/config/pipelines.yml:/usr/share/logstash/config/pipelines.yml
+      - ./logstash/config/queries/:/usr/share/logstash/config/queries/
+
 volumes:
   db_data: {}
   rabbitmq_data: {}
