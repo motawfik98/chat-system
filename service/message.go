@@ -25,6 +25,17 @@ func (s *Store) CreateMessage(ctx context.Context, message *domain.Message) erro
 	return nil
 }
 
+func (s *Store) UpdateMessage(message *domain.Message) error {
+	var appID uint
+	s.database.Select("id").Table("applications").Where("token = ?", message.AppToken).Scan(&appID)
+	chatIDSubQuery := s.database.Select("id").Table("chats").Where("app_id = ? AND number = ?", appID, message.ChatNumber)
+	s.database.Select("id").Table("messages").Where("chat_id = (?) AND number = ?", chatIDSubQuery, message.Number).Scan(&message.ID)
+	if message.ID == 0 {
+		return errors.New("unable to find specified app token, chat number, and message number combination")
+	}
+	return nil
+}
+
 func (s *Store) GetMessagesByApplicationAndChat(appToken, chatNumber string) ([]domain.Message, error) {
 	messages := make([]domain.Message, 0)
 	appIDSubQuery := s.database.Select("id").Table("applications").Where("token = ?", appToken)

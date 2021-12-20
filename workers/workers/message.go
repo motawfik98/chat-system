@@ -29,13 +29,18 @@ func ConsumeMessages(queues *rabbitmq.Queues, db *gorm.DB, rds *redis.Client) {
 	go func() {
 		for d := range messages {
 			go func(d amqp.Delivery) {
-				message, err := queues.ReceiveMessage(d.Body)
+				message, action, err := queues.ReceiveMessage(d.Body)
 				if err == nil {
-					err = db.Create(message).Error
-					if err == nil {
-						messagesCount := rds.HIncrBy(context.Background(), fmt.Sprintf("%s-%d", message.AppToken, message.ChatNumber), domain.TOTAL_MESSAGES, 1).Val()
-						db.Table("chats").Where("id = ?", message.ChatID).Update("messages_count", messagesCount)
-						d.Ack(false)
+					if action == rabbitmq.Create {
+						if err := db.Create(message).Error; err == nil {
+							messagesCount := rds.HIncrBy(context.Background(), fmt.Sprintf("%s-%d", message.AppToken, message.ChatNumber), domain.TOTAL_MESSAGES, 1).Val()
+							db.Table("chats").Where("id = ?", message.ChatID).Update("messages_count", messagesCount)
+							d.Ack(false)
+						}
+					} else if action == rabbitmq.Update {
+						if err := db.Model(message).Update("message", message.Message).Error; err == nil {
+							d.Ack(false)
+						}
 					}
 				}
 			}(d)
