@@ -38,6 +38,7 @@ services:
       - rabbitmq
       - redis
       - db
+      - logstash
     build: .
     container_name: instabugWebServer
     ports:
@@ -52,12 +53,14 @@ services:
       RABBITMQ_PORT: 5672
       RABBITMQ_HOST: rabbitmq
       REDIS_HOST: redis
+      ELASTICSEARCH_URL: http://elasticsearch:9200
 
   workers:
     depends_on:
       - rabbitmq
       - redis
       - db
+      - logstash
     build:
       context: .
       dockerfile: ./workers/Dockerfile
