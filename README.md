@@ -12,7 +12,7 @@ Both chats and messages have a number to be identified with, as all IDs are hidd
 
 The application uses MySQL, RabbitMQ, Redis, and Elasticsearch.
 
-##Run The App
+## Run The App
 1. Clone the repo
 2. Navigate to the cloned folder
 3. Run `docker-compose up`
