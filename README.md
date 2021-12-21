@@ -19,29 +19,31 @@ The application uses MySQL, RabbitMQ, Redis, and Elasticsearch.
 4. Wait until you see SQL queries popping to screen
 ![Server started successfully](pictures/ServerStart.png)
 
-###MySQL
+### MySQL
+
 This app uses MySQL to preserve and store the data entered by the user
 
-###Redis
+### Redis
+
 Redis is used to save the maximum chat/message number per application to be fetched quickly later on instead of hitting the DB each time a creation is required
 
 It also holds the total number of chats and messages per application and increment it when a new record is inserted to DB
-###RabbitMQ
+### RabbitMQ
 When users requests to create/update an entity, after being validated, its number is being fetched from Redis before sending it to the queue returning it to the user (while it has not been yet saved to DB).
 
 RabbitMQ Workers are listening to changes in the queue, and persisting the entity to DB.
 
-###ElasticSearch
+### ElasticSearch
 All messages are being stored and synced into elasticsearch server (using Logstash) to be able to perform full string operations on it faster.
 
 It supports two modes when multiple words are entered (and/or), so if the user is specifying string "Hello World" to search for, he has the option to search for it as a whole query (and) OR he could indicate to search for each word alone (OR).
 
 This is specified by the "operator" field in the search messages endpoints
 
-###Kibana
+### Kibana
 Kibana is also listed in the docker-compose file, in case you want visual representation for the data
 
-###Full Scenario
+### Full Scenario
 I'll demonstrate the full scenario using CreateMessage endpoint, as it contains the Elasticsearch integration and all of its steps are being nearly the same in creating apps & chats
 
 1. User send request to create a message with the specified body, application token, and chat number
