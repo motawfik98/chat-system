@@ -56,14 +56,14 @@ func (s *Store) GetMessageByApplicationAndChatAndNumber(appToken string, number,
 }
 
 func (s *Store) SearchMessages(ctx context.Context, number uint, appToken, message, operator string) ([]domain.Message, error) {
-	var id int64
+	var id uint
 	appIDSubQuery := s.database.Select("id").Table("applications").Where("token = ?", appToken)
-	s.database.Select("id").Table("chats").Where("app_id = (?) AND number = ?", appIDSubQuery, number).Count(&id)
+	s.database.Select("id").Table("chats").Where("app_id = (?) AND number = ?", appIDSubQuery, number).Scan(&id)
 	if id == 0 {
 		return nil, errors.New("unable to find specified app token and chat number combination")
 	}
 	var buf bytes.Buffer
-	query := elasticdomain.CreateQuery(message, operator)
+	query := elasticdomain.CreateQuery(message, operator, id)
 	if err := json.NewEncoder(&buf).Encode(query); err != nil {
 		return nil, err
 	}

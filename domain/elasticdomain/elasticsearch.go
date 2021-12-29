@@ -5,13 +5,24 @@ import "chat-system/domain"
 type hash map[string]interface{}
 type Search map[string]hash
 
-func CreateQuery(message, operator string) Search {
+func CreateQuery(message, operator string, chatID uint) Search {
 	return Search{
 		"query": hash{
-			"match": hash{
-				"message": hash{
-					"query":    message,
-					"operator": operator,
+			"bool": hash{
+				"must": []hash{
+					{
+						"match": hash{
+							"message": hash{
+								"query":    message,
+								"operator": operator,
+							},
+						},
+					},
+					{
+						"match": hash{
+							"chat_id": chatID,
+						},
+					},
 				},
 			},
 		},
