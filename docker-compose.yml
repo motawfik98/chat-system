@@ -55,6 +55,26 @@ services:
       REDIS_HOST: redis
       ELASTICSEARCH_URL: http://elasticsearch:9200
 
+  search-rails:
+    depends_on:
+      - db
+      - logstash
+      - webserver
+    build:
+      context: ./search-rails
+      dockerfile: Dockerfile
+    container_name: instabugSearchRails
+    restart: on-failure
+    environment:
+      PORT: 4500
+      DB_HOST: instabugDB
+      DB_USERNAME: docker_chat
+      DB_PASSWORD: DockerChat*Pass
+      DB_NAME: docker_chat_system
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+    ports:
+      - "4500:4500"
+
   workers:
     depends_on:
       - rabbitmq
