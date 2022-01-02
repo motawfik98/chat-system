@@ -1,24 +1,13 @@
-# README
+This project only contains the search endpoint which could be accessed using the following URL
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+POST `http://localhost:4500/applications/:appToken/chats/:chatNumber/search`
 
-Things you may want to cover:
+With a json body of two key value pairs
+1. `message` which is the text to search for
+2. `operator` a string value to indicate whether an or/and search is required
 
-* Ruby version
+It's first access the database to make sure that a chat with the specified app token and chat number exists.
 
-* System dependencies
+Then it'll connect to elasticsearch server to fetch the results.
 
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+*N.B.* The endpoint will throw an error if the index hasn't been created yet. So, make sure to create messages using the Golang app before trying to search for it.

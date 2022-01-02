@@ -56,3 +56,12 @@ I'll demonstrate the full scenario using CreateMessage endpoint, as it contains 
 7. Workers increase total-messages stored in Redis and save it to the DB
 8. Logstash is querying DB server every 5 seconds to find out if a change has occurred (record is created or updated) based on the updated_at field
 9. Logstash adds the new message to the elasticsearch server
+
+### Search Scenario
+1. There's two search endpoints, one is created with Golang while the other is created using Rails
+2. Both work exactly the same, the only difference is the port number. As for Golang the port number is 3000 while for Rails it's 4500
+3. To access endpoint send a POST request to the following URL `http://localhost:PORT/applications/:appToken/chats/:chatNumber/search`
+4. A body must be supplied that contains the `message` to search for and the `operator` type (whether and/or)
+5. The `and` operator will search for the exact string in the exact order (in case of multiple words/full sentence)
+6. While the `or` operator will search each word individually
+7. Please make sure that the index is created (messages were added) before trying to access Rails API
