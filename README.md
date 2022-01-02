@@ -15,7 +15,7 @@ The application uses MySQL, RabbitMQ, Redis, and Elasticsearch.
 ## Run The App
 1. Clone the repo
 2. Navigate to the cloned folder
-3. **IMPORTANT** On Linux systems, run `sudo chown -R 1000:1000 volumes`
+3. **IMPORTANT** On Linux systems, run `sudo mkdir -p volumes/elasticsearch/data && sudo chown 1000:1000 volumes/elasticsearch/data`
 4. Run `docker-compose up`
 5. Wait until you see SQL queries popping to screen
 ![Server started successfully](pictures/ServerStart.png)
